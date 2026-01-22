@@ -1,0 +1,7 @@
+{
+  "name": "Travella Trails",
+  "description": "A modern, visually engaging travel and tourism platform designed to inspire exploration, discovery, and seamless trip planning.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
