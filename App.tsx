@@ -8,9 +8,10 @@ import ItinerariesPage from './components/ItinerariesPage';
 import BlueprintPage from './components/BlueprintPage';
 import ArchitectureManifest from './components/ArchitectureManifest';
 import ProjectBlueprint from './components/ProjectBlueprint';
-import { DESTINATIONS, SearchIcon } from './constants';
+import ContactPage from './components/ContactPage';
+import { DESTINATIONS, SearchIcon, MenuIcon } from './constants';
 
-type Page = 'home' | 'about' | 'experience' | 'itineraries' | 'blueprint' | 'architecture' | 'platform-blueprint';
+type Page = 'home' | 'about' | 'experience' | 'itineraries' | 'blueprint' | 'architecture' | 'platform-blueprint' | 'contact';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -19,6 +20,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<'All' | 'Beach' | 'Nature' | 'City' | 'Culture'>('All');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   
   const searchInputRef = useRef<HTMLInputElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
@@ -32,6 +34,7 @@ const App: React.FC = () => {
   const navigateTo = (page: Page) => (e?: React.MouseEvent) => {
     e?.preventDefault();
     setCurrentPage(page);
+    setMobileNavOpen(false);
   };
 
   const filteredDestinations = filter === 'All' 
@@ -57,14 +60,63 @@ const App: React.FC = () => {
               <a href="#" onClick={navigateTo('itineraries')} className={`hover:text-primary transition-colors ${currentPage === 'itineraries' ? 'text-primary' : ''}`}>Itineraries</a>
               <a href="#" onClick={navigateTo('experience')} className={`hover:text-primary transition-colors ${currentPage === 'experience' ? 'text-primary' : ''}`}>Experience</a>
               <a href="#" onClick={navigateTo('about')} className={`hover:text-primary transition-colors ${currentPage === 'about' ? 'text-primary' : ''}`}>About</a>
+              <a href="#" onClick={navigateTo('contact')} className={`hover:text-primary transition-colors ${currentPage === 'contact' ? 'text-primary' : ''}`}>Contact</a>
             </div>
 
             <div className="hidden md:flex items-center gap-4">
                <button className="text-sm font-bold text-primary">Login</button>
             </div>
+
+            {/* Mobile hamburger */}
+            <button
+              type="button"
+              className="md:hidden p-2 text-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              onClick={() => setMobileNavOpen((prev) => !prev)}
+              aria-label={mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            >
+              <MenuIcon />
+            </button>
           </div>
         </div>
       </nav>
+
+      {/* Mobile navigation menu */}
+      {mobileNavOpen && (
+        <div className="md:hidden fixed top-[76px] left-0 right-0 z-40 px-4">
+          <div className="glass rounded-2xl p-4 shadow-2xl flex flex-col gap-3 bg-white/95 border border-slate-100">
+            <button
+              onClick={navigateTo('home')}
+              className={`text-base font-semibold text-left py-2 px-1 rounded-lg ${currentPage === 'home' ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
+            >
+              Destinations
+            </button>
+            <button
+              onClick={navigateTo('itineraries')}
+              className={`text-base font-semibold text-left py-2 px-1 rounded-lg ${currentPage === 'itineraries' ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
+            >
+              Itineraries
+            </button>
+            <button
+              onClick={navigateTo('experience')}
+              className={`text-base font-semibold text-left py-2 px-1 rounded-lg ${currentPage === 'experience' ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
+            >
+              Experience
+            </button>
+            <button
+              onClick={navigateTo('about')}
+              className={`text-base font-semibold text-left py-2 px-1 rounded-lg ${currentPage === 'about' ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
+            >
+              About
+            </button>
+            <button
+              onClick={navigateTo('contact')}
+              className={`text-base font-semibold text-left py-2 px-1 rounded-lg ${currentPage === 'contact' ? 'text-primary' : 'text-slate-700 hover:text-primary'}`}
+            >
+              Contact
+            </button>
+          </div>
+        </div>
+      )}
 
       {currentPage === 'home' && (
         <>
@@ -224,6 +276,7 @@ const App: React.FC = () => {
       {currentPage === 'blueprint' && <BlueprintPage onBack={navigateTo('home')} />}
       {currentPage === 'architecture' && <ArchitectureManifest onBack={navigateTo('home')} />}
       {currentPage === 'platform-blueprint' && <ProjectBlueprint onBack={navigateTo('home')} />}
+      {currentPage === 'contact' && <ContactPage onBack={navigateTo('home')} />}
 
       <footer className="bg-slate-50 border-t border-slate-200 pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

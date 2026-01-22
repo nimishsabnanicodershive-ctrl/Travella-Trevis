@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Load environment variables from .env.local at project root
-dotenv.config({ path: '../.env.local' });
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -42,7 +42,7 @@ app.post('/api/plan', async (req: Request, res: Response) => {
 
     // Get the generative model
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-1.5-flash-latest',
       generationConfig: {
         temperature: 0.7,
         topP: 0.95,
