@@ -15,14 +15,9 @@ type Page = 'home' | 'about' | 'experience' | 'itineraries' | 'blueprint' | 'arc
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [search, setSearch] = useState('');
-  const [aiResult, setAiResult] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<'All' | 'Beach' | 'Nature' | 'City' | 'Culture'>('All');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -140,106 +135,10 @@ const App: React.FC = () => {
               <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto font-medium">
                 Join thousands of explorers who trust Travella Trails for their curated, seamless, and unforgettable travel experiences across the globe.
               </p>
-
-              <div className="max-w-xl mx-auto glass rounded-2xl p-2 shadow-2xl">
-                <form className="flex items-center bg-white rounded-xl p-1" onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (!search.trim()) {
-                    searchInputRef.current?.focus();
-                    return;
-                  }
-                  try {
-                    setError('');
-                    setLoading(true);
-
-                    const prompt = `Create a 3-day travel itinerary for: ${search}. Return strict JSON with shape: { "title": string, "summary": string, "days": [{ "day": string, "theme": string, "activities": string[] }] }`;
-
-                    const res = await fetch('/api/plan', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ prompt }),
-                    });
-
-                    if (!res.ok) {
-                      throw new Error('Failed to generate itinerary');
-                    }
-
-                    const data = await res.json();
-                    setAiResult(data);
-                  } catch (err) {
-                    console.error(err);
-                    setError('We could not generate a plan right now. Please try again in a moment.');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}>
-
-                  <div className="flex-1 flex items-center gap-3 px-4">
-                    <SearchIcon />
-                    <input 
-                      ref={searchInputRef}
-                      type="text" 
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Where do you want to go?" 
-                      className="w-full py-3 bg-transparent outline-none text-slate-700 font-medium placeholder:text-slate-400"
-                    />
-                  </div>
-                  <button 
-                    type="submit"
-                    disabled={loading}
-                    className="bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-primary/90 transition-all disabled:opacity-50"
-                  >
-                    {loading ? 'Thinking...' : 'AI Planner'}
-                  </button>
-                </form>
-                {error && (
-                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
-                    {error}
-                  </div>
-                )}
-              </div>
             </div>
           </section>
 
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 relative z-20">
-            {aiResult && (
-              <div className="mb-20 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl border border-slate-100">
-                  <div className="flex flex-col md:flex-row justify-between items-start gap-8">
-                    <div className="flex-1">
-                      <span className="text-primary font-bold uppercase tracking-widest text-sm block mb-2">AI-Generated Itinerary</span>
-                      <h2 className="text-4xl font-serif font-black text-dark mb-4">{aiResult.title}</h2>
-                      <p className="text-slate-600 text-lg leading-relaxed mb-4">{aiResult.summary}</p>
-                    </div>
-                    <button onClick={() => setAiResult(null)} className="text-slate-400 hover:text-red-500 font-bold flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                      Clear
-                    </button>
-                  </div>
-
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {aiResult.days.map((day: any) => (
-                      <div key={day.day} className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
-                        <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary font-bold mb-4">
-                          {day.day}
-                        </div>
-                        <h4 className="font-bold text-lg mb-3">{day.theme}</h4>
-                        <ul className="space-y-3">
-                          {day.activities.map((act: string, idx: number) => (
-                            <li key={idx} className="flex gap-3 text-sm text-slate-600 font-medium">
-                              <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                              {act}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
             <section className="mb-20">
               <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                 <div>
