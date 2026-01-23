@@ -9,20 +9,42 @@ import BlueprintPage from './components/BlueprintPage';
 import ArchitectureManifest from './components/ArchitectureManifest';
 import ProjectBlueprint from './components/ProjectBlueprint';
 import ContactPage from './components/ContactPage';
+import LoginPage from './components/LoginPage';
 import { DESTINATIONS, SearchIcon, MenuIcon } from './constants';
 
-type Page = 'home' | 'about' | 'experience' | 'itineraries' | 'blueprint' | 'architecture' | 'platform-blueprint' | 'contact';
+type Page = 'home' | 'about' | 'experience' | 'itineraries' | 'blueprint' | 'architecture' | 'platform-blueprint' | 'contact' | 'login';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [filter, setFilter] = useState<'All' | 'Beach' | 'Nature' | 'City' | 'Culture'>('All');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState<string>('');
   
   const heroSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
+
+  useEffect(() => {
+    // Check if user is logged in on mount
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('user');
+    if (token && user) {
+      setIsLoggedIn(true);
+      const userData = JSON.parse(user);
+      setUserName(userData.name);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    setIsLoggedIn(false);
+    setUserName('');
+    setCurrentPage('home');
+  };
 
   
 
@@ -59,7 +81,24 @@ const App: React.FC = () => {
             </div>
 
             <div className="hidden md:flex items-center gap-4">
-               <button className="text-sm font-bold text-primary">Login</button>
+               {isLoggedIn ? (
+                 <div className="flex items-center gap-3">
+                   <span className="text-sm font-medium text-slate-600">Welcome, {userName}</span>
+                   <button 
+                     onClick={handleLogout}
+                     className="text-sm font-bold text-primary hover:text-primary/80 transition-colors"
+                   >
+                     Logout
+                   </button>
+                 </div>
+               ) : (
+                 <button 
+                   onClick={navigateTo('login')}
+                   className="text-sm font-bold text-primary hover:text-primary/80 transition-colors"
+                 >
+                   Login
+                 </button>
+               )}
             </div>
 
             {/* Mobile hamburger */}
@@ -176,6 +215,20 @@ const App: React.FC = () => {
       {currentPage === 'architecture' && <ArchitectureManifest onBack={navigateTo('home')} />}
       {currentPage === 'platform-blueprint' && <ProjectBlueprint onBack={navigateTo('home')} />}
       {currentPage === 'contact' && <ContactPage onBack={navigateTo('home')} />}
+      {currentPage === 'login' && (
+        <LoginPage 
+          onBack={navigateTo('home')} 
+          onLoginSuccess={() => {
+            const user = localStorage.getItem('user');
+            if (user) {
+              const userData = JSON.parse(user);
+              setUserName(userData.name);
+            }
+            setIsLoggedIn(true);
+            setCurrentPage('home');
+          }}
+        />
+      )}
 
       <footer className="bg-slate-50 border-t border-slate-200 pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
