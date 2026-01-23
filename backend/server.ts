@@ -2,26 +2,12 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
 // Load environment variables from .env.local at project root
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET || 'travella-trails-secret-key-change-in-production';
-
-// In-memory user storage (replace with database in production)
-interface User {
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-  createdAt: Date;
-}
-
-const users: User[] = [];
 
 // Initialize Gemini AI
 const apiKey = process.env.GEMINI_API_KEY;
@@ -39,146 +25,6 @@ app.use(express.json());
 // Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'AI Planner API is running' });
-});
-
-// Authentication endpoints
-app.post('/api/auth/signup', async (req: Request, res: Response) => {
-  try {
-    const { email, password, name } = req.body;
-
-    // Validation
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'Invalid email format' });
-    }
-
-    // Password validation
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
-
-    // Check if user already exists
-    const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (existingUser) {
-      return res.status(400).json({ error: 'Email already registered' });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const newUser: User = {
-      id: Date.now().toString(),
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      name,
-      createdAt: new Date()
-    };
-
-    users.push(newUser);
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: newUser.id, email: newUser.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    console.log(`[AUTH] New user registered: ${email}`);
-
-    res.status(201).json({
-      message: 'Account created successfully',
-      token,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name
-      }
-    });
-  } catch (error: any) {
-    console.error('[AUTH] Signup error:', error);
-    res.status(500).json({ error: 'Failed to create account' });
-  }
-});
-
-app.post('/api/auth/login', async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
-
-    // Validation
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    // Find user
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    console.log(`[AUTH] User logged in: ${email}`);
-
-    res.json({
-      message: 'Login successful',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      }
-    });
-  } catch (error: any) {
-    console.error('[AUTH] Login error:', error);
-    res.status(500).json({ error: 'Failed to login' });
-  }
-});
-
-app.post('/api/auth/verify', async (req: Request, res: Response) => {
-  try {
-    const { token } = req.body;
-
-    if (!token) {
-      return res.status(400).json({ error: 'Token is required' });
-    }
-
-    // Verify token
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
-
-    // Find user
-    const user = users.find(u => u.id === decoded.userId);
-    if (!user) {
-      return res.status(401).json({ error: 'User not found' });
-    }
-
-    res.json({
-      valid: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      }
-    });
-  } catch (error: any) {
-    res.status(401).json({ error: 'Invalid token', valid: false });
-  }
 });
 
 // AI Itinerary planning endpoint
@@ -412,15 +258,11 @@ app.post('/api/recommend-itineraries', async (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`\n🚀 AI Planner API Server running on http://localhost:${PORT}`);
   console.log(`📍 Endpoints:`);
-  console.log(`   - POST ${PORT}/api/auth/signup (User registration)`);
-  console.log(`   - POST ${PORT}/api/auth/login (User login)`);
-  console.log(`   - POST ${PORT}/api/auth/verify (Verify token)`);
   console.log(`   - POST ${PORT}/api/plan (Generate travel itinerary)`);
   console.log(`   - POST ${PORT}/api/suggest-experiences (Get experience suggestions)`);
   console.log(`   - POST ${PORT}/api/recommend-itineraries (Get itinerary recommendations)`);
   console.log(`   - GET ${PORT}/api/health (Health check)`);
-  console.log(`🔑 Gemini API Key: ${apiKey ? '✓ Configured' : '✗ Missing'}`);
-  console.log(`🔐 JWT Secret: ${JWT_SECRET !== 'travella-trails-secret-key-change-in-production' ? '✓ Custom' : '⚠ Default (change in production)'}\n`);
+  console.log(`🔑 Gemini API Key: ${apiKey ? '✓ Configured' : '✗ Missing'}\n`);
 });
 
 export default app;
