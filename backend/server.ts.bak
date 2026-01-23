@@ -268,7 +268,7 @@ app.post('/api/suggest-experiences', async (req: Request, res: Response) => {
     console.log(`[API] Generating experience suggestions for: ${preferences.substring(0, 50)}...`);
 
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-1.5-flash',
       generationConfig: {
         temperature: 0.8,
         topP: 0.95,
@@ -345,7 +345,7 @@ app.post('/api/recommend-itineraries', async (req: Request, res: Response) => {
     console.log(`[API] Generating itinerary recommendations for: ${interests.substring(0, 50)}...`);
 
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-1.5-flash',
       generationConfig: {
         temperature: 0.8,
         topP: 0.95,
