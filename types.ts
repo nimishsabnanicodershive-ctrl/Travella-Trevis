@@ -17,3 +17,8 @@ export interface Itinerary {
   destination: string;
   activities: string[];
 }
+
+export interface User {
+  name: string;
+  email: string;
+}

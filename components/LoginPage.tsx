@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { User } from '../types';
 
 interface LoginPageProps {
   onBack: () => void;
-  onLoginSuccess: () => void;
+  onLoginSuccess: (user: User) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLoginSuccess }) => {
@@ -42,6 +43,42 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLoginSuccess }) => {
       return;
     }
 
+    // Create a mock authentication token (in a real app, this would come from a server)
+    const authToken = `mock_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // For signup, we use the name provided by the user
+    // For login, we need to retrieve the user's name from existing data or prompt for it
+    let storedUsers = [];
+    try {
+      const storedData = localStorage.getItem('users');
+      if (storedData) {
+        storedUsers = JSON.parse(storedData);
+      }
+    } catch (e) {
+      console.log("No existing users found");
+    }
+
+    let existingUser = storedUsers.find((user: any) => user.email === email);
+    let userName = '';
+
+    if (isSignUp) {
+      // For signup, use the name provided by the user
+      userName = name;
+      // Save the new user to the users list
+      storedUsers.push({ name, email });
+      localStorage.setItem('users', JSON.stringify(storedUsers));
+    } else if (existingUser) {
+      // For login, use the name from existing user data
+      userName = existingUser.name;
+    } else {
+      // Fallback for login if user doesn't exist in our simulated DB
+      userName = 'User';
+    }
+
+    const userData = { name: userName, email };
+    localStorage.setItem('authToken', authToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+
     // Simulate successful login/signup
     setSuccess(isSignUp ? 'Account created successfully!' : 'Login successful!');
     
@@ -50,9 +87,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onLoginSuccess }) => {
     setPassword('');
     setName('');
 
-    // Call success callback after a short delay
+    // Call success callback after a short delay, passing user data
     setTimeout(() => {
-      onLoginSuccess();
+      onLoginSuccess(userData);
     }, 1500);
   };
 

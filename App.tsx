@@ -51,9 +51,9 @@ const App: React.FC = () => {
     setMobileNavOpen(false);
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (user: { name: string; email: string }) => {
     setIsLoggedIn(true);
-    setUserName('User'); // Set a default name or get from form submission
+    setUserName(user.name);
     setCurrentPage('home');
   };
 
