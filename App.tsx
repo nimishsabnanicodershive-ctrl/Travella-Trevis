@@ -155,6 +155,30 @@ const App: React.FC = () => {
                 >
                   Contact
                 </button>
+                
+                {/* Mobile login/logout section */}
+                <div className="pt-3 border-t border-slate-100">
+                  {isLoggedIn ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-base font-semibold text-slate-700 truncate">
+                        Welcome, {userName}
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="text-base font-semibold text-left py-2 px-1 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={navigateTo('login')}
+                      className="text-base font-semibold text-left py-2 px-1 rounded-lg text-primary hover:text-primary/80 hover:bg-primary/5 w-full text-left"
+                    >
+                      Login
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}
