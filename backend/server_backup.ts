@@ -1,9 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
 // Load environment variables from .env.local at project root
 dotenv.config();
@@ -30,7 +27,7 @@ if (!apiKey) {
   process.exit(1);
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
+
 
 // Middleware
 app.use(cors());
@@ -83,23 +80,11 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
     users.push(newUser);
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: newUser.id, email: newUser.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+  
 
     console.log(`[AUTH] New user registered: ${email}`);
 
-    res.status(201).json({
-      message: 'Account created successfully',
-      token,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name
-      }
-    });
+    
   } catch (error: any) {
     console.error('[AUTH] Signup error:', error);
     res.status(500).json({ error: 'Failed to create account' });
